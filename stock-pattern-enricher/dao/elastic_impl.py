@@ -8,7 +8,7 @@ import config.config as config
 logger = get_logger(__name__)
 
 class ElasticDAOImpl(ElasticDAOInterface):
-    def __init__(self, es_host: str = "localhost", es_port: int = 9200):
+    def __init__(self, es_host: str = "elasticsearch", es_port: int = 9200):
         self.es = get_es_client(es_host, es_port)
         logger.info(f"Using shared Elasticsearch client at {es_host}:{es_port}")
 

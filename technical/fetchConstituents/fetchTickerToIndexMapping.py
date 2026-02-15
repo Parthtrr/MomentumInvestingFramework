@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch
 
 ES_INDEX = "indices"
 
-es = Elasticsearch("http://localhost:9200", verify_certs=False)
+es = Elasticsearch("http://elasticsearch:9200", verify_certs=False)
 
 def build_reverse_dict():
     reverse_dict = {}

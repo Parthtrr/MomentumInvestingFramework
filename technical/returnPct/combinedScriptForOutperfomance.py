@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch
 # ---------------------------
 # CONFIG
 # ---------------------------
-ES_HOST = "http://localhost:9200"
+ES_HOST = "http://elasticsearch:9200"
 ES_INDEX = "nifty_data_weekly"
 OUT_FILE = "finalOutperformance.xlsx"
 

@@ -19,6 +19,9 @@ curl -XDELETE http://elasticsearch:9200/nifty_data_weekly || true
 echo "Running Technical Full Indexing..."
 python technical/technicalCharts/fullIndexing.py
 
+echo "creating the custom indices"
+python technical/IndexConstituents/indicesAndConstituents.py
+
 echo "Running Pattern Enricher..."
 python stock-pattern-enricher/main.py
 

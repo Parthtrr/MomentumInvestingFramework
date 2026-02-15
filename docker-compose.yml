@@ -38,6 +38,10 @@ services:
     networks:
       - stocknet
     restart: "no"
+    volumes:
+      - .:/app
+    working_dir: /app
+
 
 networks:
   stocknet:

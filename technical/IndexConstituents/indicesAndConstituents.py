@@ -21,7 +21,7 @@ mapping = {
 }
 
 # Local Elasticsearch instance without auth
-es = Elasticsearch("http://localhost:9200", verify_certs=False)
+es = Elasticsearch("http://elasticsearch:9200", verify_certs=False)
 
 
 def create_index():

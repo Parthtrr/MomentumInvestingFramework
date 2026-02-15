@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 class ElasticWriter:
 
-    def __init__(self, index_name: str, host: str = "http://localhost:9200"):
+    def __init__(self, index_name: str, host: str = "http://elasticsearch:9200"):
         self.index = index_name
         self.es = Elasticsearch(host)
 

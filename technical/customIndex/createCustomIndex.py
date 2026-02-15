@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch, helpers
 import pandas as pd
 
-ES = Elasticsearch("http://localhost:9200")
+ES = Elasticsearch("http://elasticsearch:9200")
 SRC_INDEX = "nifty_data_weekly"
 META_INDEX = "indices"
 BASE_VALUE = 1000.0

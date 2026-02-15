@@ -6,7 +6,7 @@ from datetime import datetime
 # ==========================================================
 # CONFIG
 # ==========================================================
-ES_HOST = "http://localhost:9200"
+ES_HOST = "http://elasticsearch:9200"
 TECH_INDEX = "nifty_data_weekly"
 FUND_INDEX = "nifty_fundamental"
 SCAN_DATE = "2026-02-09"
