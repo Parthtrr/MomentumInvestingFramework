@@ -1,15 +1,13 @@
 from elasticsearch import Elasticsearch
 import pandas as pd
 import numpy as np
-from datetime import datetime
-
+from datetime import datetime, timedelta
 # ==========================================================
 # CONFIG
 # ==========================================================
-ES_HOST = "http://elasticsearch:9200"
+ES_HOST = "http://localhost:9200"
 TECH_INDEX = "nifty_data_weekly"
 FUND_INDEX = "nifty_fundamental"
-SCAN_DATE = "2026-02-09"
 OUTPUT_FILE = "support_resistance_scan.xlsx"
 
 es = Elasticsearch(ES_HOST)
@@ -78,6 +76,17 @@ df_mf = pd.DataFrame({
         "ICICI Prudential Pharma Healthcare & Diagnostics Fund"
     ]
 })
+
+def get_latest_monday():
+    today = datetime.today()
+    # Monday = 0, Sunday = 6
+    days_since_monday = today.weekday()
+    latest_monday = today - timedelta(days=days_since_monday)
+    return latest_monday.strftime("%Y-%m-%d")
+
+SCAN_DATE = get_latest_monday()
+
+print(f"📅 Scan Date (Latest Monday): {SCAN_DATE}")
 
 def calculate_growth(current, previous):
     if previous in [0, None]:
