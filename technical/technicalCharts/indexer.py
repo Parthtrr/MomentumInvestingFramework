@@ -5,50 +5,54 @@ from Constant import rsi_window, roc_period, atr_period
 from elastic_client import get_es_client
 from logging_config import get_logger
 from mappings import index_mapping
+import numpy as np
 
 logger = get_logger(__name__)
 
 
 # ================= INDICATORS ================= #
-
-import numpy as np
-
 def calculate_rsi(data, period):
     data = data.copy()
 
-    data["change"] = data["Close"].diff()
-    data["gain"] = data["change"].clip(lower=0)
-    data["loss"] = -data["change"].clip(upper=0)
+    # Drop rows where Close is NaN (only for calculation)
+    valid_data = data[data["Close"].notna()].copy()
 
-    # Create empty columns
-    data["avg_gain"] = np.nan
-    data["avg_loss"] = np.nan
+    # If not enough data, return original with NaN RSI
+    if len(valid_data) <= period:
+        data["rsi"] = np.nan
+        return data
 
-    # Step 1: First average = SMA of first 'period'
-    data.loc[data.index[period], "avg_gain"] = (
-        data["gain"].iloc[1:period+1].mean()
-    )
-    data.loc[data.index[period], "avg_loss"] = (
-        data["loss"].iloc[1:period+1].mean()
-    )
+    valid_data["change"] = valid_data["Close"].diff()
+    valid_data["gain"] = valid_data["change"].clip(lower=0)
+    valid_data["loss"] = -valid_data["change"].clip(upper=0)
 
-    # Step 2: Wilder smoothing
-    for i in range(period + 1, len(data)):
-        data.loc[data.index[i], "avg_gain"] = (
-            (data.loc[data.index[i-1], "avg_gain"] * (period - 1)
-             + data.loc[data.index[i], "gain"]) / period
+    valid_data["avg_gain"] = np.nan
+    valid_data["avg_loss"] = np.nan
+
+    # First SMA
+    valid_data.iloc[period, valid_data.columns.get_loc("avg_gain")] = \
+        valid_data["gain"].iloc[1:period+1].mean()
+
+    valid_data.iloc[period, valid_data.columns.get_loc("avg_loss")] = \
+        valid_data["loss"].iloc[1:period+1].mean()
+
+    # Wilder smoothing
+    for i in range(period + 1, len(valid_data)):
+        valid_data.iloc[i, valid_data.columns.get_loc("avg_gain")] = (
+            (valid_data.iloc[i-1]["avg_gain"] * (period - 1)
+             + valid_data.iloc[i]["gain"]) / period
         )
 
-        data.loc[data.index[i], "avg_loss"] = (
-            (data.loc[data.index[i-1], "avg_loss"] * (period - 1)
-             + data.loc[data.index[i], "loss"]) / period
+        valid_data.iloc[i, valid_data.columns.get_loc("avg_loss")] = (
+            (valid_data.iloc[i-1]["avg_loss"] * (period - 1)
+             + valid_data.iloc[i]["loss"]) / period
         )
 
-    # RS & RSI
-    data["rs"] = data["avg_gain"] / data["avg_loss"]
-    data["rsi"] = 100 - (100 / (1 + data["rs"]))
+    valid_data["rs"] = valid_data["avg_gain"] / valid_data["avg_loss"]
+    valid_data["rsi"] = 100 - (100 / (1 + valid_data["rs"]))
 
-    data["rsi"] = data["rsi"].fillna(0.0)
+    # Merge back into original dataframe
+    data["rsi"] = valid_data["rsi"]
 
     return data
 
