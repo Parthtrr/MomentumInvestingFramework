@@ -11,17 +11,43 @@ logger = get_logger(__name__)
 
 # ================= INDICATORS ================= #
 
+import numpy as np
+
 def calculate_rsi(data, period):
-    # data = data.copy()
+    data = data.copy()
+
     data["change"] = data["Close"].diff()
     data["gain"] = data["change"].clip(lower=0)
     data["loss"] = -data["change"].clip(upper=0)
 
-    data["avg_gain"] = data["gain"].rolling(period).mean()
-    data["avg_loss"] = data["loss"].rolling(period).mean()
+    # Create empty columns
+    data["avg_gain"] = np.nan
+    data["avg_loss"] = np.nan
 
+    # Step 1: First average = SMA of first 'period'
+    data.loc[data.index[period], "avg_gain"] = (
+        data["gain"].iloc[1:period+1].mean()
+    )
+    data.loc[data.index[period], "avg_loss"] = (
+        data["loss"].iloc[1:period+1].mean()
+    )
+
+    # Step 2: Wilder smoothing
+    for i in range(period + 1, len(data)):
+        data.loc[data.index[i], "avg_gain"] = (
+            (data.loc[data.index[i-1], "avg_gain"] * (period - 1)
+             + data.loc[data.index[i], "gain"]) / period
+        )
+
+        data.loc[data.index[i], "avg_loss"] = (
+            (data.loc[data.index[i-1], "avg_loss"] * (period - 1)
+             + data.loc[data.index[i], "loss"]) / period
+        )
+
+    # RS & RSI
     data["rs"] = data["avg_gain"] / data["avg_loss"]
     data["rsi"] = 100 - (100 / (1 + data["rs"]))
+
     data["rsi"] = data["rsi"].fillna(0.0)
 
     return data
