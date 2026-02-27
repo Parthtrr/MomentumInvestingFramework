@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 # ==========================================================
 # CONFIG
 # ==========================================================
-ES_HOST = "http://localhost:9200"
+ES_HOST = "http://elasticsearch:9200"
 TECH_INDEX = "nifty_data_weekly"
 FUND_INDEX = "nifty_fundamental"
 OUTPUT_FILE = "support_resistance_scan.xlsx"
