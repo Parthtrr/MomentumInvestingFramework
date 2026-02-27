@@ -5,10 +5,40 @@ from datetime import datetime, timedelta
 # ==========================================================
 # CONFIG
 # ==========================================================
+
+from datetime import datetime, timedelta, timezone
+
+# ==========================================================
+# FILE NAME AS CURRENT WEEK FRIDAY (IST)
+# Format: 7_FEB_2026.xlsx
+# Works correctly in Docker (UTC → IST conversion)
+# ==========================================================
+
+IST = timezone(timedelta(hours=5, minutes=30))
+
+def get_current_week_friday_ist():
+    # Current time in IST
+    today = datetime.now(IST)
+
+    # Monday = 0, Friday = 4
+    days_to_friday = 4 - today.weekday()
+
+    # If today is Saturday (5) or Sunday (6), move to next Friday
+    if days_to_friday < 0:
+        days_to_friday += 7
+
+    friday = today + timedelta(days=days_to_friday)
+
+    # Format: 7_FEB_2026
+    return friday.strftime("%-d_%b_%Y").upper()
+
+# Final output file
+OUTPUT_FILE = f"{get_current_week_friday_ist()}.xlsx"
+
+print(f"📁 Output File (IST): {OUTPUT_FILE}")
 ES_HOST = "http://elasticsearch:9200"
 TECH_INDEX = "nifty_data_weekly"
 FUND_INDEX = "nifty_fundamental"
-OUTPUT_FILE = "support_resistance_scan.xlsx"
 
 es = Elasticsearch(ES_HOST)
 
