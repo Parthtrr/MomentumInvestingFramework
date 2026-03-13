@@ -95,7 +95,7 @@ df_mf = pd.DataFrame({
         "NIFTY India Digital",
         "NIFTY India Healthcare"
     ],
-    "Benchmark RSI": [40, 39.41, 38.69, 41, 39, 37.27],
+    "Benchmark RSI": [40, 39, 38, 41, 32, 37],
     "Current RSI": [53.26, 52.89, 42.02, 58.19, 39.91, 43.73],
     "Mutual fund to invest": [
         "Parag Parikh Flexi Cap Fund Direct Growth",
