@@ -36,7 +36,7 @@ def get_current_week_friday_ist():
 OUTPUT_FILE = f"{get_current_week_friday_ist()}.xlsx"
 
 print(f"📁 Output File (IST): {OUTPUT_FILE}")
-ES_HOST = "http://elasticsearch:9200"
+ES_HOST = "http://localhost:9200"
 TECH_INDEX = "nifty_data_weekly"
 FUND_INDEX = "nifty_fundamental"
 
