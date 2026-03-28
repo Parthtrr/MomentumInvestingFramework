@@ -6,7 +6,7 @@ export PYTHONPATH=$(pwd)
 
 echo "Waiting for Elasticsearch..."
 
-until curl -s http://elasticsearch:9200 > /dev/null; do
+until curl -s http://localhost:9200 > /dev/null; do
   sleep 2
 done
 
@@ -14,7 +14,7 @@ echo "Elasticsearch is ready!"
 
 
 echo "Deleting Elasticsearch index..."
-curl -XDELETE http://elasticsearch:9200/nifty_data_weekly || true
+curl -XDELETE http://localhost:9200/nifty_data_weekly || true
 
 echo "Running Technical Full Indexing..."
 python technical/technicalCharts/fullIndexing.py
