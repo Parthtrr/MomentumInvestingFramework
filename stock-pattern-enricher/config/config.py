@@ -1,4 +1,4 @@
-host = "elasticsearch"
+host = "localhost"
 port = "9200"
 index_name = "nifty_data_weekly"
 START_DATE = "2010-01-01"
