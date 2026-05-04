@@ -21,6 +21,10 @@ nifty_fundamental = {
                 "type": "long"
             },
 
+            "currentQuarterResult": {
+                "type": "boolean"
+            },
+
             "sector": {
                 "properties": {
                     "broad_sector": {"type": "keyword"},

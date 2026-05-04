@@ -3,7 +3,7 @@ from elasticsearch import Elasticsearch
 from fundamental.models.fundamental import FundamentalData
 from fundamental.utils.logger import get_logger
 import pandas as pd
-from datetime import datetime
+from datetime import date, datetime
 
 
 logger = get_logger(__name__)
@@ -29,7 +29,8 @@ class ElasticWriter:
             "market_cap": data.market_cap,
             "sector": self._sector_doc(data),
             "ratios": self._ratios_doc(data),
-            "quarterly": quarterly
+            "quarterly": quarterly,
+            "currentQuarterResult": self._has_current_quarter_result(quarterly),
         }
 
         document = self._sanitize_for_es(document)
@@ -143,6 +144,40 @@ class ElasticWriter:
                 })
 
         return records
+
+    def _has_current_quarter_result(self, quarterly: list) -> bool:
+        expected_period = self._current_result_period()
+        metrics_found = {
+            row["metric"]
+            for row in quarterly or []
+            if row.get("period_date") == expected_period
+        }
+
+        has_revenue = bool({"Sales", "Revenue"} & metrics_found)
+        has_profit = "Net Profit" in metrics_found
+        has_eps = "EPS in Rs" in metrics_found
+
+        return has_revenue and has_profit and has_eps
+
+    def _current_result_period(self, today: date | None = None) -> str:
+        today = today or date.today()
+
+        # Use the latest completed quarter because results are announced
+        # after quarter-end, not during the in-progress quarter.
+        if today.month <= 3:
+            year = today.year - 1
+            month = 12
+        elif today.month <= 6:
+            year = today.year
+            month = 3
+        elif today.month <= 9:
+            year = today.year
+            month = 6
+        else:
+            year = today.year
+            month = 9
+
+        return f"{year:04d}-{month:02d}"
 
     import math
 

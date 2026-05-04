@@ -132,6 +132,44 @@ def calculate_slope(values):
     return round(slope, 2)
 
 
+def get_current_result_period(today=None):
+    today = today or datetime.now().date()
+
+    # Results are announced for the latest completed quarter.
+    if today.month <= 3:
+        year = today.year - 1
+        month = 12
+    elif today.month <= 6:
+        year = today.year
+        month = 3
+    elif today.month <= 9:
+        year = today.year
+        month = 6
+    else:
+        year = today.year
+        month = 9
+
+    return f"{year:04d}-{month:02d}"
+
+
+def is_current_quarter_result_out(current_quarter_result, quarterly):
+    if current_quarter_result is not None:
+        return bool(current_quarter_result)
+
+    expected_period = get_current_result_period()
+    metrics_found = {
+        row.get("metric")
+        for row in quarterly or []
+        if row.get("period_date") == expected_period
+    }
+
+    has_revenue = bool({"Sales", "Revenue"} & metrics_found)
+    has_profit = "Net Profit" in metrics_found
+    has_eps = "EPS in Rs" in metrics_found
+
+    return has_revenue and has_profit and has_eps
+
+
 # ==========================================================
 # QUALITY SCORING
 # ==========================================================
@@ -287,6 +325,7 @@ def get_fundamental_data(ticker):
         "Industry": np.nan,
         "ROCE": 0,
         "ROE": 0,
+        "Current_Quarter_Result_Out": "No",
         "Sales_QoQ_%": 0,
         "Profit_QoQ_%": 0,
         "EPS_QoQ_%": 0,
@@ -309,6 +348,10 @@ def get_fundamental_data(ticker):
         roe = ratios.get("roe", 0)
 
         quarterly = src.get("quarterly", [])
+        current_quarter_result = is_current_quarter_result_out(
+            src.get("currentQuarterResult"),
+            quarterly
+        )
 
         sales, profits, eps = [], [], []
 
@@ -329,6 +372,7 @@ def get_fundamental_data(ticker):
             empty_result["Industry"] = industry
             empty_result["ROCE"] = roce
             empty_result["ROE"] = roe
+            empty_result["Current_Quarter_Result_Out"] = "Yes" if current_quarter_result else "No"
             return empty_result
 
         sales_vals = [v for _, v in sales][-5:]
@@ -340,6 +384,7 @@ def get_fundamental_data(ticker):
             "Industry": industry,
             "ROCE": roce,
             "ROE": roe,
+            "Current_Quarter_Result_Out": "Yes" if current_quarter_result else "No",
             "Sales_QoQ_%": calculate_growth(sales_vals[-1], sales_vals[-2]),
             "Profit_QoQ_%": calculate_growth(profit_vals[-1], profit_vals[-2]),
             "EPS_QoQ_%": calculate_growth(eps_vals[-1], eps_vals[-2]),
@@ -463,5 +508,4 @@ if __name__ == "__main__":
         ws_missed.add_chart(bar2, "E2")
 
     print("✅ Done!")
-
 
