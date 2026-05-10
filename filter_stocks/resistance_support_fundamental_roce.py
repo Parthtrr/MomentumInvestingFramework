@@ -170,6 +170,37 @@ def is_current_quarter_result_out(current_quarter_result, quarterly):
     return has_revenue and has_profit and has_eps
 
 
+SIGNAL_SHEET_COLUMNS = [
+    "Ticker",
+    "Support",
+    "Resistance",
+    "Close",
+    "Sector",
+    "Industry",
+    "ROCE",
+    "ROE",
+    "Current_Quarter_Result_Out",
+    "Sales_QoQ_%",
+    "Profit_QoQ_%",
+    "EPS_QoQ_%",
+    "Sales_YoY_%",
+    "Profit_YoY_%",
+    "EPS_YoY_%",
+    "Sales_Slope_5Q",
+    "Profit_Slope_5Q",
+    "Net_Score"
+]
+
+
+def prepare_signal_sheet(df):
+    export_df = df.copy()
+
+    if "Current_Quarter_Result_Out" not in export_df.columns:
+        export_df["Current_Quarter_Result_Out"] = "No"
+
+    return export_df.reindex(columns=SIGNAL_SHEET_COLUMNS)
+
+
 # ==========================================================
 # QUALITY SCORING
 # ==========================================================
@@ -457,6 +488,9 @@ if __name__ == "__main__":
 
     from openpyxl.chart import PieChart, Reference
 
+    matched_export = prepare_signal_sheet(df_matched)
+    missed_export = prepare_signal_sheet(df_missed)
+
     with pd.ExcelWriter(OUTPUT_FILE, engine="openpyxl") as writer:
 
         # Write sheets
@@ -464,8 +498,8 @@ if __name__ == "__main__":
         sector_missed.to_excel(writer, sheet_name="sector_missed", index=False)
         df_indices.to_excel(writer, sheet_name="indices", index=False)
         df_mf.to_excel(writer, sheet_name="MF", index=False)
-        df_matched.to_excel(writer, sheet_name="matched", index=False)
-        df_missed.to_excel(writer, sheet_name="missed", index=False)
+        matched_export.to_excel(writer, sheet_name="matched", index=False)
+        missed_export.to_excel(writer, sheet_name="missed", index=False)
 
         workbook = writer.book
 
@@ -508,4 +542,3 @@ if __name__ == "__main__":
         ws_missed.add_chart(bar2, "E2")
 
     print("✅ Done!")
-
